@@ -1,0 +1,65 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    color-scheme: dark;
+  }
+  
+  body {
+    @apply bg-surface-950 text-slate-300;
+  }
+
+  h1, h2, h3, h4, h5, h6 {
+    @apply text-slate-100 font-semibold tracking-tight;
+  }
+}
+
+@layer components {
+  /* Glassmorphism panels */
+  .glass-panel {
+    @apply bg-surface-900/60 backdrop-blur-md border border-white/10 rounded-xl shadow-xl;
+  }
+  
+  /* Primary buttons */
+  .btn-primary {
+    @apply bg-brand-600 hover:bg-brand-500 text-white px-4 py-2 rounded-lg 
+           font-medium transition-all shadow-[0_0_15px_rgba(99,102,241,0.3)] 
+           hover:shadow-[0_0_25px_rgba(99,102,241,0.5)] active:scale-95;
+  }
+
+  /* Secondary buttons */
+  .btn-secondary {
+    @apply bg-surface-800 hover:bg-surface-700 text-slate-200 border border-white/10
+           px-4 py-2 rounded-lg font-medium transition-colors active:scale-95;
+  }
+
+  /* Input fields */
+  .input-field {
+    @apply bg-surface-950/50 border border-white/10 rounded-lg px-4 py-2 
+           text-white placeholder:text-slate-500 focus:outline-none focus:ring-2 
+           focus:ring-brand-500/50 focus:border-brand-500 transition-all;
+  }
+}
+
+/* Custom scrollbar */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+::-webkit-scrollbar-track {
+  @apply bg-transparent;
+}
+::-webkit-scrollbar-thumb {
+  @apply bg-surface-700 rounded-full border-2 border-surface-950;
+}
+::-webkit-scrollbar-thumb:hover {
+  @apply bg-surface-500;
+}
+
+/* tldraw dark overrides if needed */
+.tl-theme__dark {
+  --color-background: #0a0f1e !important;
+  --color-panel: #0f172a !important;
+}
