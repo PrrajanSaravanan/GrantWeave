@@ -1,89 +1,157 @@
 # GrantWeave
 
 <div align="center">
-  <img src="https://agent.tinyfish.ai/favicon.ico" alt="Logo" width="80" height="auto" />
-  <h3>Autonomous Grant Hunting Platform</h3>
+  <img src="https://agent.tinyfish.ai/favicon.ico" alt="Logo" width="120" height="auto" />
+  <h1>GrantWeave</h1>
+  <h3>Autonomous, Self-Healing Grant Hunting Platform</h3>
   <p>Powered by the <strong>AetherForge Kernel</strong> and the <strong>TinyFish Web Agent API</strong></p>
+  
+  <p>
+    <a href="#overview">Overview</a> •
+    <a href="#core-architecture-aetherforge">Architecture</a> •
+    <a href="#features">Features</a> •
+    <a href="#tech-stack">Tech Stack</a> •
+    <a href="#getting-started">Getting Started</a>
+  </p>
 </div>
 
 ---
 
 ## 🚀 Overview
 
-GrantWeave is a beautiful, real-world SaaS designed to help nonprofits and startups find, match, and prepare grant applications. Instead of manually scouring outdated portals, users simply describe their needs, and GrantWeave deploys parallel, autonomous web agents to hunt across actual government and foundation websites.
+The world of grant applications is notoriously fragmented, outdated, and labor-intensive. Startups and nonprofits waste hundreds of hours manually navigating clunky government portals (like Grants.gov) and obscure foundation websites just to find opportunities they qualify for.
 
-### The AetherForge Kernel
-GrantWeave runs on **AetherForge**, a custom, state-of-the-art orchestration layer built specifically for web agents:
+**GrantWeave automates this entirely.** 
 
-*   🧬 **EvoForge:** Self-healing agents. If a site changes its layout and an agent fails, EvoForge automatically mutates the original instructions, testing 3-5 variants simultaneously until one succeeds.
-*   🧠 **Akasha Ledger:** Permanent memory. Once an EvoForge mutation bypasses a block, it is saved to local SQLite memory. Future agents encountering the same portal will utilize this known-good strategy instantly.
-*   🕸️ **Weave Mesh:** Dynamic coordination. A single "Hunt" command spawns a Master Cell, which subsequently recruits specialized Sub-Cells for different portals, executing them concurrently within safe semaphore limits.
-*   ⏳ **Temporal Fabric:** Session resilience. Agent states are checkpointed automatically, allowing interrupted hunts to be resumed flawlessly without losing data.
+GrantWeave is a real-world SaaS that deploys parallel, autonomous web agents to hunt for grants, match them against your organization's profile, and prepare the initial application package. Instead of scraping APIs (which most grant portals lack), GrantWeave uses the [TinyFish Web Agent API](https://agent.tinyfish.ai) to literally drive headless browsers in the cloud, navigating portals exactly like a human would.
+
+---
+
+## 🧠 Core Architecture: AetherForge
+
+At the heart of GrantWeave is the **AetherForge Kernel**, a proprietary orchestration layer designed specifically to manage, coordinate, and heal autonomous web agents. The kernel is composed of four primary subsystems:
+
+### 1. The Weave Mesh (Task Orchestration)
+The **Weave Mesh** is responsible for dynamic agent coordination. When a user requests a "Hunt", the orchestrator spawns a Master Cell. This Master Cell analyzes the target portals and recursively recruits Sub-Cells to execute searches concurrently. It utilizes asynchronous semaphore limits to prevent overwhelming the backend or the TinyFish API.
+
+```mermaid
+graph TD
+    User([User Request]) --> Master[Master Cell]
+    Master --> |Recruits| Cell1{Sub-Cell: Grants.gov}
+    Master --> |Recruits| Cell2{Sub-Cell: NSF.gov}
+    Master --> |Recruits| Cell3{Sub-Cell: Private Foundations}
+    
+    Cell1 --> |TinyFish API| Browser1[Headless Browser 1]
+    Cell2 --> |TinyFish API| Browser2[Headless Browser 2]
+    Cell3 --> |TinyFish API| Browser3[Headless Browser 3]
+    
+    Browser1 --> |SSE Stream| Frontend[Live Browser Grid UI]
+    Browser2 --> |SSE Stream| Frontend
+    Browser3 --> |SSE Stream| Frontend
+```
+
+### 2. EvoForge (Self-Healing Mutations)
+Websites change constantly. Traditional scrapers break when a button is moved. **EvoForge** solves this. If a TinyFish agent reports a failure (e.g., "Could not find Next button"), EvoForge intercepts the failure, analyzes the DOM context, and automatically mutates the original goal into 3-5 variant strategies. These variants race each other; the first to succeed dictates the new path forward.
+
+```mermaid
+sequenceDiagram
+    participant Agent as TinyFish Agent
+    participant Evo as EvoForge Engine
+    participant Ledger as Akasha Ledger
+    
+    Agent--x Evo: Failure: "Submit Button Not Found"
+    Evo->Evo: Generate Variant 1 (Try hitting Enter)
+    Evo->Evo: Generate Variant 2 (Look for 'Apply' text)
+    Evo->Evo: Generate Variant 3 (Use Tab navigation)
+    
+    Evo->>Agent: Deploy Variant 1
+    Evo->>Agent: Deploy Variant 2
+    Evo->>Agent: Deploy Variant 3
+    
+    Agent-->>Evo: Variant 2 Succeeds!
+    Evo->>Ledger: Save Variant 2 as permanent strategy
+```
+
+### 3. The Akasha Ledger (Permanent Memory)
+When EvoForge discovers a successful mutation, that knowledge shouldn't be lost. The **Akasha Ledger** is a local SQLite-based vector-like memory bank. Before any agent starts a task, it checks the Ledger. If a known-working template exists for a specific portal, the agent bypasses standard discovery and uses the optimized, proven strategy, drastically reducing execution time and API costs.
+
+### 4. Temporal Fabric (Resilient State)
+Hunts can take minutes. If a server restarts or a connection drops, progress is preserved. The **Temporal Fabric** continuously checkpoints the `Cell` states into the database as compressed JSON blobs. When the system re-initializes, it re-inflates the Weave Mesh exactly where it left off.
+
+---
+
+## ✨ Features
+
+*   **Live Multi-Browser Extraction:** A dashboard grid displaying up to 6 real-time `iframe` feeds of TinyFish agents driving headless browsers.
+*   **Dynamic Mind Maps:** A live `@tldraw` canvas that organically grows, connecting your organization's focus areas to newly discovered grants as they are found via SSE.
+*   **Real-time EvoLog:** Watch the EvoForge mutation engine visually intercept errors and deploy variant strategies in real time.
+*   **Team Handoff (WebSockets):** Generate a QR code or share link. Teammates can instantly join the live session, synchronized via WebSockets.
+*   **Export Pipeline:** One-click PDF generation utilizing `fpdf2` to seamlessly pre-fill grant application forms with your organization's exact payload.
+*   **GrantWeave Wrapped:** A Spotify-style weekly visualization of your agent performance, portals scanned, and top matches.
 
 ---
 
 ## 🛠 Tech Stack
 
-*   **Backend:** Python `FastAPI` + `asyncio`
-*   **Database:** Local `SQLite` (via `aiosqlite`)
-*   **Real-time:** `SSE` (Server-Sent Events) for logs/streaming URLs, `WebSockets` for team handoff.
-*   **Frontend:** React 18, `Vite`, TypeScript
-*   **Styling:** Tailwind CSS (Dark Mode Glassmorphism)
-*   **State Management:** `Zustand`
-*   **Visualizations:** `@tldraw/tldraw` (Mind Maps)
-*   **Agents:** [TinyFish Web Agent API](https://agent.tinyfish.ai)
+Designed to be robust, asynchronous, and entirely local-first (no cloud DBs required).
+
+| Category | Technology | Purpose |
+| :--- | :--- | :--- |
+| **Backend** | Python, FastAPI, asyncio | Core high-performance API and async orchestration |
+| **Database** | SQLite, `aiosqlite` | Local, file-based relational storage (No Redis/Postgres needed) |
+| **Streaming** | SSE (Server-Sent Events) | Real-time push of agent tracking and log data directly to UI |
+| **Agent API** | TinyFish API | The engine executing natural language as browser actions |
+| **Frontend** | React 18, Vite, TypeScript | Fast, strictly typed component architecture |
+| **State** | Zustand | Lightweight frontend state management |
+| **Styling** | Tailwind CSS | Custom dark-mode glassmorphism design system |
+| **Canvas** | `@tldraw/tldraw` | Infinite canvas for the grant discovery Mind Map |
 
 ---
 
-## ⚙️ Setup & Installation
+## ⚙️ Getting Started
 
-This project is entirely local-first. No cloud databases required.
+### 1. Prerequisites
+*   Python 3.9+
+*   Node.js 18+
+*   A TinyFish API Key ([Get one here](https://agent.tinyfish.ai))
 
-### 1. Backend Setup
+### 2. Backend Setup
+The backend handles the AetherForge kernel and database generation.
 
 ```bash
 cd backend
 
-# Create a virtual environment
+# Create and activate a virtual environment
 python -m venv venv
 source venv/bin/activate  # On Windows: venv\Scripts\activate
 
-# Install dependencies
+# Install the Python dependencies
 pip install -r requirements.txt
 
-# Run the database seeder (crucial for the demo experience!)
+# Run the database seeder (Crucial: This generates demo orgs and past sessions)
 python seed_db.py
 ```
 
-### 2. Environment Variables
-
-In the root directory, copy the example environment file:
-
+### 3. Environment Configuration
+From the project root:
 ```bash
 cp .env.example .env
 ```
+Open `.env` and paste your `TINYFISH_API_KEY`.
 
-Open `.env` and insert your **TinyFish API Key**.
-
-### 3. Frontend Setup
-
+### 4. Frontend Setup
 ```bash
 cd frontend
-
-# Install Node dependencies
 npm install
 ```
 
----
-
-## 🏃‍♂️ Running the Application
-
-You will need two terminal windows.
+### 5. Running the Application
+You will need two terminal windows running concurrently.
 
 **Terminal 1 (FastAPI Backend):**
 ```bash
 cd backend
-# Make sure your venv is active
+# Ensure venv is active
 uvicorn main:app --reload --port 8000
 ```
 
@@ -93,33 +161,26 @@ cd frontend
 npm run dev
 ```
 
-The application will be available at: **http://localhost:5173**
+Open your browser to: **http://localhost:5173**
 
 ---
 
-## 🎬 Hackathon / Demo Script
+## 🎬 Impress the Judges: The Demo Script
 
-Want to show off the system? Follow this flow:
+To show off the full power of GrantWeave during a presentation:
 
-1.  **Onboarding Box:** Because you ran `seed_db.py`, the system is already seeded. Click "Upload PDF" and pick any dummy PDF, or choose "Manual Entry" and click through.
-2.  **The Dashboard:** You'll land on the gorgeous dark-mode dashboard.
-3.  **Initiate the Hunt:** In the command bar, type: *"Find STEM education grants in California focused on high school robotics"* and hit Send.
-4.  **Watch the Magic:**
-    *   **Live Browsers:** The grid in the center will populate with up to 6 `iframe` windows showing the TinyFish agents actually driving web browsers in the cloud.
-    *   **EvoLog:** The right panel will show the AetherForge kernel logging mutation attempts in real time.
-    *   **Mind Map:** On the left, a `tldraw` canvas will automatically arrange categories, and as agents report `MATCH_FOUND` events via SSE, new grant nodes will pop into existence on the canvas.
-5.  **Team Handoff (WebSockets):** Click the "Copy Link" button in the bottom left module. Open an Incognito window and paste the link. Watch the "viewing" counter instantly update via WebSockets.
-6.  **Applications & Export:** Go to the "Applications" tab to see the final portfolio. Click **"Download Core PDFs"** to trigger `fpdf2` generating a styled, pre-filled application package using the organization's backend profile.
-7.  **Wrapped:** Check out the "Wrapped" tab for a Spotify-style weekly summary.
-
----
-
-## 🤝 Architecture Notes
-
-*   **Why SSE?** Web agents are slow. Instead of blocking HTTP requests, the backend orchestrator yields a raw HTTP stream. The frontend interprets `STARTED`, `SCANNING`, `STREAMING_URL`, `MATCH`, and `EVO` events as they happen.
-*   **Why SQLite?** To adhere to the strict local-only requirement, everything including the Akasha Ledger's vector-like memory is stored relationally in `aetherforge.db`.
+1.  **Skip Onboarding:** Since you ran `seed_db.py`, the system is pre-seeded. Click through the Onboarding Wizard using the provided demo organization.
+2.  **The Command:** On the main dashboard, enter a highly specific prompt: *"Find STEM education grants in California focused on underrepresented high school robotics teams."* Click Hunt.
+3.  **The Visuals:**
+    *   Point to the **Live Browser Grid** in the center: *"These aren't static API calls; these are autonomous agents driving actual browsers in parallel."*
+    *   Point to the **tldraw Mind Map** on the left: *"As agents discover matching grants, they are dynamically mapped to our organization's focus nodes in real time via SSE."*
+    *   Point to the **EvoLog** on the right: *"If an agent hits a CAPTCHA or a broken layout, EvoForge intercepts the failure and spawns mutations to route around the blockage."*
+4.  **Collaboration:** Click the **Team Handoff** button. Scan the QR code with your phone to show instantaneous WebSocket synchronization between desktop and mobile.
+5.  **Output:** Switch to the **Applications** tab. Hit **Download Core PDFs** to show how GrantWeave automatically injects the organization's backend profile into the final application formats.
+6.  **Analytics:** End on the **Wrapped** tab to show the aesthetically pleasing, data-dense weekly summary.
 
 ---
 <div align="center">
-  <i>Built with Python, React, and an excessive amount of caffeine.</i>
+  <i>Built with Python, React, and an excessive amount of caffeine.</i><br>
+  <i>Empowering nonprofits to focus on their mission, not paperwork.</i>
 </div>
