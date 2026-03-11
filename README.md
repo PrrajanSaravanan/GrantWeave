@@ -165,22 +165,4 @@ Open your browser to: **http://localhost:5173**
 
 ---
 
-## 🎬 Impress the Judges: The Demo Script
 
-To show off the full power of GrantWeave during a presentation:
-
-1.  **Skip Onboarding:** Since you ran `seed_db.py`, the system is pre-seeded. Click through the Onboarding Wizard using the provided demo organization.
-2.  **The Command:** On the main dashboard, enter a highly specific prompt: *"Find STEM education grants in California focused on underrepresented high school robotics teams."* Click Hunt.
-3.  **The Visuals:**
-    *   Point to the **Live Browser Grid** in the center: *"These aren't static API calls; these are autonomous agents driving actual browsers in parallel."*
-    *   Point to the **tldraw Mind Map** on the left: *"As agents discover matching grants, they are dynamically mapped to our organization's focus nodes in real time via SSE."*
-    *   Point to the **EvoLog** on the right: *"If an agent hits a CAPTCHA or a broken layout, EvoForge intercepts the failure and spawns mutations to route around the blockage."*
-4.  **Collaboration:** Click the **Team Handoff** button. Scan the QR code with your phone to show instantaneous WebSocket synchronization between desktop and mobile.
-5.  **Output:** Switch to the **Applications** tab. Hit **Download Core PDFs** to show how GrantWeave automatically injects the organization's backend profile into the final application formats.
-6.  **Analytics:** End on the **Wrapped** tab to show the aesthetically pleasing, data-dense weekly summary.
-
----
-<div align="center">
-  <i>Built with Python, React, and an excessive amount of caffeine.</i><br>
-  <i>Empowering nonprofits to focus on their mission, not paperwork.</i>
-</div>
